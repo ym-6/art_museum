@@ -1,12 +1,6 @@
 @extends('layouts.navlayout')
 
 @section('content')
-<style>
-    .container {
-        border: 1px solid rgba(0, 0, 0, 0.3); /* 枠線 */
-        background-color: rgba(255, 255, 255, 0.3); /* 背景色 */
-    }
-</style>
 
 <div class="container">
     <div class="row justify-content-center">
@@ -30,7 +24,7 @@
                         @csrf
                         <div class="form-group">
                             <label for="email">メールアドレス</label>
-                            <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" />
+                            <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" autocomplete="email" />
                         </div>
                         <div class="text-right">
                             <button type="submit" class="btn btn-primary">メール送信</button>
@@ -41,4 +35,5 @@
         </div>
     </div>
 </div>
+
 @endsection

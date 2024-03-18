@@ -26,5 +26,5 @@ class ResetPasswordController extends Controller
      *
      * @var string
      */
-    public const HOME = '/home';
+    public const HOME = '/';
 }

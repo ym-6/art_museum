@@ -25,37 +25,43 @@
                             <p class="card-title">{{ $likedReview->museum_name }}</p>
                             <h5 class="card-title">{{ $likedReview->review_title }}</h5>
                             <p class="card-text">
-                                <a href="{{ route('review.detail', ['id' => $likedReview->id]) }}">
+                                <a href="{{ route('reviews.show', ['reviews' => $likedReview->id]) }}">
                                     {{ substr($likedReview->review_body, 0, 50) }}{{ strlen($likedReview->review_body) > 50 ? "..." : "" }}
                                 </a>
                             </p>
                         </div>
                     </div>
                     @endforeach
+                    {{ $likedReviews->links() }}
                 </div>
 
                 <!-- 投稿したレビュー -->
                 <div class="tab-pane fade" id="posted_reviews">
-                    @foreach ($postedReviews as $postedReview)
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <p class="card-title">{{ $postedReview->museum_name }}</p>
-                            <h5 class="card-title">{{ $postedReview->review_title }}</h5>
-                            <p class="card-text">
-                                <a href="{{ route('review.detail', ['id' => $postedReview->id]) }}">
-                                    {{ substr($postedReview->review_body, 0, 50) }}{{ strlen($postedReview->review_body) > 50 ? "..." : "" }}
-                                </a>
-                            </p>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
+                    @if ($postedReviews->isEmpty())
+                        <p>投稿したレビューはありません。</p>
+                    @else
+                        @foreach ($postedReviews as $postedReview)
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <p class="card-title">{{ $postedReview->museum_name }}</p>
+                                    <h5 class="card-title">{{ $postedReview->review_title }}</h5>
+                                    <p class="card-text">
+                                        <a href="{{ route('reviews.show', ['reviews' => $postedReview->id]) }}">
+                                        {{ substr($postedReview->review_body, 0, 50) }}{{ strlen($postedReview->review_body) > 50 ? "..." : "" }}
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                        @endforeach
+                        {{ $postedReviews->links() }}
+                    @endif
+                </div>                
             </div>
         </div>
     </div>
     <!-- 戻るボタン -->
     <div class="text-center mt-3">
-        <a href="{{ route('mypage') }}" class="btn btn-primary">戻る</a>
+        <a href="{{ route('mypages.index') }}" class="btn btn-primary">戻る</a>
     </div>
 </div>
 @endsection

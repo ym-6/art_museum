@@ -4,39 +4,26 @@
 <div class="container">
     <div class="row">
         <div class="col-md-12">
-            <!-- 検索フォーム -->
-            <form action="{{ route('museum.search') }}" method="GET" class="mb-4">
-                <div class="row">
-                    <div class="col-md-8">
-                        <select name="category" id="category" class="form-select">
-                            <!-- オプションを追加 -->
-                            <option value="1">都道府県</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <button type="submit" class="btn btn-primary">検索</button>
-                    </div>
-                </div>
-            </form>
+            <h2 class="text-center mb-4">レビュー一覧</h2>
 
-            <h2>レビュー一覧</h2>
-            
-            <!-- レビューを繰り返し表示 -->
-            @for ($i = 0; $i < 30; $i++)
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <!-- レビューの情報を表示 -->
-                        <p class="card-title">美術館名</p>
-                        <h5 class="card-title">レビュータイトル</h5>
-                        <!-- レビュー文の最初の50文字だけ表示 -->
-                        <p class="card-text">
-                            <a href="{{ route('review.detail', ['id' => $review->id]) }}">
-                                {{ substr($review->body, 0, 50) }}{{ strlen($review->body) > 50 ? "..." : "" }}
-                            </a>
-                        </p>
-                    </div>
+            <!-- レビュー一覧 -->
+            <div class="row">
+                @foreach ($reviews as $review)
+                <div class="col-md-12"> 
+                    <a href="{{ route('reviews.show', ['reviews'=>$review->id]) }}">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                @if(isset($review->museum))
+                                    <p>{{ $review->museum->name }}</p>
+                                @endif
+                                <h5 class="card-title">{{ $review->title }}</h5>
+                                <p class="card-text">{{ $review->body }}</p>
+                            </div>
+                        </div>
+                    </a>
                 </div>
-            @endfor
+                @endforeach
+            </div>
             
             <!-- ページ遷移 -->
             <nav aria-label="Page navigation">
@@ -47,11 +34,9 @@
                         </a>
                     </li>
                     <!-- ページ数を表示 -->
-                    <li class="page-item"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item"><a class="page-link" href="#">4</a></li>
-                    <li class="page-item"><a class="page-link" href="#">5</a></li>
+                    @for ($i = 1; $i <= $pageCount; $i++)
+                        <li class="page-item"><a class="page-link" href="#">{{ $i }}</a></li>
+                    @endfor
                     <li class="page-item">
                         <a class="page-link" href="#" aria-label="Next">
                             <span aria-hidden="true">&raquo;</span>
@@ -59,6 +44,11 @@
                     </li>
                 </ul>
             </nav>
+
+            <!-- レビュー登録のボタン -->
+            <div class="text-left mt-3">
+                <a href="{{ route('reviews.create') }}" class="btn btn-primary float-start">レビュー登録</a>
+            </div>
         </div>
     </div>
 </div>

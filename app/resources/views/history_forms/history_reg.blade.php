@@ -8,27 +8,40 @@
                 <div class="card-header text-center">来訪歴登録</div>
 
                 <div class="card-body">
-                    <form action="{{ route('history_conf') }}" method="POST">
+                    @if($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach($errors->all() as $message)
+                            <li>{{ $message }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
+
+
+                <div class="card-body">
+                    <form action="{{ route('histories.store') }}" method="POST">
                         @csrf
 
+                        <div class="card-body">
                         <div class="mb-3">
-                            <label for="museum_name" class="form-label">美術館名</label>
-                            <input type="text" class="form-control" id="museum_name" name="museum_name" required>
+                            <label for="museum" class="form-label">美術館名</label>
+                            <select name="name" id="name" class="form-select">
+                                <option value="">美術館を選択してください</option>
+                                @foreach($museums as $museum)
+                                    <option value="{{ $museum->id }}">{{ $museum->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
 
                         <div class="mb-3">
-                            <label for="visit_date" class="form-label">訪問日</label>
-                            <input type="date" class="form-control" id="visit_date" name="visit_date" required>
+                            <label for="date" class="form-label">訪問日</label>
+                            <input type="date" class="form-control" id="date" name="date" value="{{ old('date') }}">
                         </div>
 
                         <div class="mb-3">
                             <label for="memo" class="form-label">メモ</label>
-                            <textarea class="form-control" id="memo" name="memo" rows="5" required></textarea>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="image" class="form-label">画像登録</label>
-                            <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                            <textarea class="form-control" id="memo" name="memo" rows="5" value="{{ old('memo') }}"></textarea>
                         </div>
 
                         <button type="submit" class="btn btn-primary">登録</button>

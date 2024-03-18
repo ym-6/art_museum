@@ -10,15 +10,19 @@
                 <div class="card-body">
                     <div class="row">
                         <!-- 左側のカラム -->
-                        <div class="col-md-6">
-                            <h4><a href="{{ route('user_edit') }}">登録情報変更</a></h4>
+                        <div class="col-md-6 border-end">
+                            <p><a href="{{ route('mypages.show', ['id' => $user->id]) }}">登録情報編集</a></p>
+                            <!-- 管理者ユーザーのみ表示 -->
+                            @if (Auth::user()->is_admin)
+                                <p><a href="{{ route('owner.index') }}">管理者ページ</a></p>
+                            @endif
                         </div>
 
                         <!-- 右側のカラム -->
                         <div class="col-md-6">
-                            <h4><a href="{{ route('visit.history') }}">来訪歴</a></h4>
-                            <h4><a href="{{ route('bookmark') }}">ブックマーク</a></h4>
-                            <h4><a href="{{ route('myreview') }}">マイレビュー</a></h4>
+                            <p><a href="{{ route('histories.index') }}">来訪歴</a></p>
+                            <p><a href="{{ route('bookmarks.index') }}">ブックマーク</a></p>
+                            <p><a href="{{ route('myreviews.index') }}">マイレビュー</a></p>
                         </div>
                     </div>
                 </div>
@@ -27,5 +31,5 @@
     </div>
 </div>
 
-<a href="{{ route('main') }}" class="btn btn-primary mt-3">戻る</a>
+<a href="{{ route('index') }}" class="btn btn-primary col-1">戻る</a>
 @endsection

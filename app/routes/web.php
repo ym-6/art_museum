@@ -1,62 +1,100 @@
 <?php
 
 use App\Http\Controllers\DisplayController;
-use App\Http\Controllers\RegistrationController;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\MuseumController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\MypageController;
+use App\Http\Controllers\OwnerController;
+use App\Http\Controllers\FlagController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+
+use App\Http\Controllers\Auth\RegisterController;
+
+
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+
+use App\Museum;
+use App\Review;
+use App\History;
+use App\User;
 
 Auth::routes();
 
-//メインページ表示
-Route::get('/', [DisplayController::class, 'index']);
+// 新規登録
+Route::get('/register', [App\Http\Controllers\Auth\RegisterController::class,'showRegistrationForm'])->name('register');
+Route::post('/register', [App\Http\Controllers\Auth\RegisterController::class,'register']);
+Route::get('/register/conf', [App\Http\Controllers\Auth\RegisterController::class,'showConfirmation'])->name('register.conf');
+Route::get('/register/comp', [App\Http\Controllers\Auth\RegisterController::class,'completeRegistration'])->name('register.comp');
 
-//美術館リスト・詳細
-Route::get('/museum_list', [DisplayController::class, 'ArtMuseums'])->name('museum.list');
-Route::get('/museum_detail', [DisplayController::class, 'ArtMuseums'])->name('museum.detail');
-
-//美術館登録・編集・削除
-//登録
-Route::get('/registration_museum', [RegistrationController::class, 'createMuseumForm'])->name('museum.reg');
-Route::post('/registration_museum', [RegistrationController::class, 'createMuseum']);
-Route::get('/confirm_museum', [RegistrationController::class, 'confirmMuseum'])->name('museum.conf');
-Route::get('/complete_museum', [RegistrationController::class, 'completeMuseum'])->name('museum.comp');
-
-//編集
-Route::get('/museum_edit/{museums}', [RegistrationController::class, 'editMuseumForm'])->name('museum.edit');
-Route::post('/museum_edit/{museums}', [RegistrationController::class, 'editMuseum']);
-
-//削除
-Route::put('/museum/{museums}', [RegistrationController::class, 'logicmuseumDelete'])->name('museum.logic-delete');
-
-//レビューリスト・詳細
-Route::get('/review_list', [DisplayController::class, 'Reviews'])->name('review.list');
-Route::get('/review_detail', [DisplayController::class, 'Reviews'])->name('review.detail');
-
-//レビュー登録・編集・削除
-//登録
-Route::get('/registration_review', [RegistrationController::class, 'createReviewForm'])->name('review.reg');
-Route::post('/registration_review', [RegistrationController::class, 'createReview']);
-Route::get('/confirm_review', [RegistrationController::class, 'confirmReview'])->name('review.conf');
-Route::get('/complete_review', [RegistrationController::class, 'completeReview'])->name('review.comp');
-
-//編集
-Route::get('/review_edit/{reviews}', [RegistrationController::class, 'editReviewForm'])->name('review.edit');
-Route::post('/review_edit/{reviews}', [RegistrationController::class, 'editReview']);
-
-//削除
-Route::put('/review/{reviews}', [RegistrationController::class, 'logicreviewDelete'])->name('review.logic-delete');
+// パスワードリセット
+Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
 
-//来訪歴リスト・詳細
+// DisplayControllerのルート
+Route::get('/', [DisplayController::class, 'index'])->name('index');
 
-//来訪歴登録・編集・詳細
+// MuseumControllerのルート
+Route::get('/museums', [MuseumController::class, 'index'])->name('museums.index');
+Route::get('/museums/create', [MuseumController::class, 'create'])->name('museums.create');
+Route::post('/museums/store', [MuseumController::class, 'store'])->name('museums.store');
+Route::post('/museums/comp', [MuseumController::class,'complete'])->name('museums.comp');
+Route::get('/museums/{museum}', [MuseumController::class, 'show'])->name('museums.show');
+Route::get('/museums/{museum}/edit', [MuseumController::class, 'edit'])->name('museums.edit');
+Route::get('/museums/{museum}/update', [MuseumController::class, 'update'])->name('museums.update');
+Route::put('/museums/{museum}/update', [MuseumController::class, 'update'])->name('museums.update');
+Route::delete('/museums/{museum}/destroy', [MuseumController::class, 'destroy'])->name('museums.destroy');
+
+
+//  フラグ処理
+Route::post('/toggle-bookmark/{id}', [FlagController::class, 'toggleBookmark'])->name('toggle.bookmark');
+Route::post('/toggle-like/{id}', [FlagController::class, 'toggleLike'])->name('toggle.like');
+
+
+// ReviewControllerのルート
+Route::get('/reviews', [ReviewController::class,'index'])->name('reviews.index');
+Route::get('/reviews/create', [ReviewController::class,'create'])->name('reviews.create');
+Route::post('/reviews/store', [ReviewController::class, 'store'])->name('reviews.store');
+Route::post('/reviews/comp', [ReviewController::class,'complete'])->name('reviews.comp');
+Route::get('/reviews/{reviews}', [ReviewController::class,'show'])->name('reviews.show');
+Route::get('/reviews/{reviews}/edit', [ReviewController::class,'edit'])->name('reviews.edit');
+Route::get('/reviews/{reviews}/update', [ReviewController::class, 'update'])->name('reviews.update');
+Route::put('/reviews/{reviews}/update', [ReviewController::class, 'update'])->name('reviews.update');
+Route::delete('/reviews/{reviews}/destroy', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+
+
+// HistoryControllerのルート
+Route::get('/histories', [HistoryController::class,'index'])->name('histories.index');
+Route::get('/histories/create', [HistoryController::class,'create'])->name('histories.create');
+Route::post('/histories/store', [HistoryController::class, 'store'])->name('histories.store');
+Route::post('/histories/comp', [HistoryController::class,'complete'])->name('histories.comp');
+Route::get('/histories/{histories}', [HistoryController::class,'show'])->name('histories.show');
+Route::get('/histories/{histories}/edit', [HistoryController::class,'edit'])->name('histories.edit');
+Route::get('/histories/{histories}/update', [HistoryController::class, 'update'])->name('histories.update');
+Route::put('/histories/{histories}/update', [HistoryController::class, 'update'])->name('histories.update');
+Route::delete('/histories/{histories}/destroy', [HistoryController::class, 'destroy'])->name('histories.destroy');
+
+
+// MypageControllerのルート
+Route::middleware(['auth'])->group(function () {
+    Route::get('/mypages', [MypageController::class,'index'])->name('mypages.index');
+    Route::get('/mypages/bookmark', [MypageController::class,'bookmarkindex'])->name('bookmarks.index');
+    Route::get('/mypages/myreview', [MypageController::class,'myreviewindex'])->name('myreviews.index');
+    Route::get('/mypages/{id}', [UserController::class,'show'])->name('mypages.show');
+    Route::post('/mypages/{id}/edit', [UserController::class,'edit'])->name('mypages.edit');
+    Route::get('/mypages/{id}/update', [UserController::class,'update'])->name('mypages.update');
+    Route::put('/mypages/{id}/update', [UserController::class,'update'])->name('mypages.update');
+    Route::delete('/mypages/{id}/destroy', [UserController::class,'destroy'])->name('mypages.destroy');
+});
+
+
+// 管理者画面
+Route::get('/owner', [OwnerController::class,'index'])->name('owner.index');
+Route::get('/users', [OwnerController::class,'usersindex'])->name('users.index');
+Route::delete('/users/{id}/destroy', [OwnerController::class,'usersdestroy'])->name('users.destroy');
+Route::get('/posts', [OwnerController::class,'postsindex'])->name('posts.index');
+

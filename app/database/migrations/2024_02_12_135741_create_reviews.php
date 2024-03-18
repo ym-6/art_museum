@@ -18,17 +18,17 @@ class CreateReviews extends Migration
             //レビュータイトル
             $table->string('title', '255');
             //レビュー本文
-            $table->text('text');
+            $table->text('body');
             //書いたユーザID
-            $table->unsignedBigInteger('users_id'); // 外部キーとしてユーザーIDを参照するカラム
-            $table->foreign('users_id')->references('id')->on('users'); // 外部キー制約
+            $table->unsignedBigInteger('user_id'); // 外部キーとしてユーザーIDを参照するカラム
+            $table->foreign('user_id')->references('id')->on('users'); // 外部キー制約
             //対象の美術館ID
-            $table->unsignedBigInteger('art_museums_id'); // 外部キーとして美術館のIDを参照するカラム
-            $table->foreign('art_museums_id')->references('id')->on('art_museums'); // 外部キー制約
+            $table->unsignedBigInteger('art_museum_id'); // 外部キーとして美術館のIDを参照するカラム
+            $table->foreign('art_museum_id')->references('id')->on('art_museums'); // 外部キー制約
             //評価（good or notgood）
             $table->tinyInteger('criterion')->default(0);
-            //いいねフラグ
-            $table->boolean('like_flg')->default(false); 
+            //削除フラグ
+            $table->boolean('del_flg')->default(0);
             $table->timestamps();
         });
     }

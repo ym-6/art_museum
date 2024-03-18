@@ -1,94 +1,64 @@
+<!-- CSRFトークンをmetaタグとして設定 -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<!-- Scripts -->
+<script src="{{ asset('js/.js') }}" defer></script>
+
 @extends('layouts.navlayout')
 
 @section('content')
 <div class="container">
-    <!-- お気に入りボタン -->
-    <div class="text-end mb-3">
-        <button class="btn btn-primary" id="favoriteButton">
-            <img src="{{ asset('path/to/heart_icon.png') }}" alt="お気に入り">
-        </button>
+    <div class="row justify-content-between">
+        <!-- お気に入りアイコンを表示 -->
+        <div class="fav">
+            @auth
+            <img src="{{ asset('img/fav1.jpeg') }}" alt="お気に入り" id="favoriteIcon" data-museum-id="{{ $museum->id }}">
+            @endauth
+        </div>
     </div>
+
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header text-center">{{ $museum->museum_name }}</div>
-
+                <div class="card-header text-center">
+                    <h2 class="mb-0">{{ $museum->name }}</h2>
+                </div>
                 <div class="card-body">
-                    <div class="mb-3 text-center">
-                        <img src="{{ $museum->image_url }}" class="img-fluid mb-3" alt="{{ $museum->museum_name }}">
-                    </div>
-
-                    <form action="{{ route('museum.update', $museum->id) }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        @method('PUT')
-
-                        <div class="mb-3">
-                            <label for="postal_code" class="form-label">郵便番号</label>
-                            <input type="text" class="form-control" id="postal_code" name="postal_code" value="{{ $museum->postal_code }}" required readonly>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="prefecture" class="form-label">都道府県</label>
-                            <input type="text" class="form-control" id="prefecture" name="prefecture" value="{{ $museum->prefecture }}" required readonly>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="address" class="form-label">住所</label>
-                            <input type="text" class="form-control" id="address" name="address" value="{{ $museum->address }}" required readonly>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="phone_number" class="form-label">電話番号</label>
-                            <input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ $museum->phone_number }}" required readonly>
-                        </div>
-
-                        <div class="mb-3">
-                            <!-- レビューボタン（小さく） -->
-                            <a href="{{ route('review.reg') }}" class="btn btn-primary btn-sm">レビューを書く</a>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">更新</button>
-                    </form>
-                    
-                    <!-- 削除ボタン -->
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                        削除
-                    </button>
-
-                    <!-- ポップアップの削除確認モーダル -->
-                    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="deleteModalLabel">削除確認</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="row">
+                        <!-- 画像を表示 -->
+                        @if($images->isNotEmpty())
+                            @foreach($images as $image)
+                                <div class="col-md-4">
+                                    <img src="{{ asset($image->path) }}" class="img-fluid mb-3" alt="{{ $museum->name }}" id="image{{ $image->id }}">
                                 </div>
-                                <div class="modal-body">
-                                    本当にこの美術館を削除しますか？
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
-                                    <form action="{{ route('museum.destroy', $museum->id) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">削除</button>
-                                    </form>
-                                </div>
+                            @endforeach
+                        @else
+                        <!-- 画像が保存されていない場合、デフォルト画像を表示 -->
+                            <div class="col-md-4">
+                                <img src="{{ asset('/img/m_e_others_501.png') }}" class="img-fluid mb-3" alt="デフォルト画像" id="defaultImage">
+                            </div>
+                        @endif                        
+                        <!-- その他の情報を表示 -->
+                        <div class="col-md-8">
+                            <ul class="list-group">
+                                <li class="list-group-item">〒{{ $museum->postalcode }}</li>
+                                <li class="list-group-item">住所：{{ $museum->prefecture ? $museum->prefecture->name : '未設定' }}{{ $museum->address }}</li>
+                                <li class="list-group-item">電話番号：{{ $museum->tel }}</li>
+                            </ul>
+                            <div class="text-center mt-3">
+                                @if(Auth::check() && (Auth::user()->is_admin == 1 || Auth::user()->id == $museum->user_id))
+                                    <!-- 編集ボタン -->
+                                    <a href="{{ route('museums.edit', ['museum' => $museum->id]) }}" class="btn btn-info mx-3">編集</a>
+                                @endif
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <div class="text-center mt-4">
+            <a href="{{ url()->previous() }}" class="btn btn-primary float-center">戻る</a>
+        </div>
     </div>
-    <!-- 戻るボタン -->
-    <a href="{{ route('museum.list') }}" class="btn btn-primary mt-3">戻る</a>
 </div>
 
-<script>
-    // お気に入りボタンのクリックイベントを処理する
-    document.getElementById('favoriteButton').addEventListener('click', function() {
-        // ここにお気に入りボタンをクリックした際の非同期通信処理
-    });
-</script>
 @endsection

@@ -8,7 +8,7 @@
                 <div class="card-header">登録情報変更</div>
                 <div class="card-body">
                     <p class="lead">アカウントを削除します。よろしいですか？</p>
-                    <form action="{{ route('user_delete_conf') }}" method="POST">
+                    <form action="{{ route('login') }}" method="POST">
                         @csrf
                         <div class="form-group">
                             <label for="email">メールアドレス</label>

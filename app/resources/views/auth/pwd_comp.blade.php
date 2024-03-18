@@ -1,12 +1,6 @@
 @extends('layouts.navlayout')
 
 @section('content')
-<style>
-    .container {
-        border: 1px solid rgba(0, 0, 0, 0.3); /* 枠線 */
-        background-color: rgba(255, 255, 255, 0.3); /* 背景色 */
-    }
-</style>
 
 <div class="container">
   <div class="row justify-content-center">

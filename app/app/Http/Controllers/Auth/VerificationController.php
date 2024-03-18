@@ -26,7 +26,7 @@ class VerificationController extends Controller
      *
      * @var string
      */
-    public const HOME = '/home';
+    public const HOME = '/';
 
     /**
      * Create a new controller instance.

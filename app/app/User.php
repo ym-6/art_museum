@@ -16,10 +16,11 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 
-        'mail', 
+        'user_name', 
+        'email', 
         'password',
-        'is_admin',
+        'is_admin', //管理フラグ
+        'del_flg',  //削除フラグ
     ];
 
     /**
@@ -39,4 +40,56 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /*
+     * The default attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'is_admin' => 0,
+    ];
+
+    // museumsテーブルとの関連付け
+    public function art_museums()
+    {
+        return $this->belongsTo(ArtMuseums::class, 'museum_id');
+    }
+    
+    // reviewsテーブルとの関連付け
+    public function review()
+    {
+        return $this->belongsTo(Reviews::class, 'review_id');
+    }
+    
+    public function visit_histories()
+    {
+        return $this->hasMany(History::class);
+    }
+
+    public function bookmarks()
+    {
+        return $this->hasMany(Bookmark::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+    public function histories()
+    {
+        return $this->hasMany(History::class);
+    }
+
+    // ユーザーが投稿したレビューを取得
+    public function postedReviews()
+    {
+        return $this->hasMany(Review::class, 'user_id');
+    }
+            
+    // ユーザーがいいねしたレビューを取得
+    public function likedReviews()
+    {
+        return $this->hasMany(Review::class, 'user_id', 'review_id', 'like_flg');
+    }
 }

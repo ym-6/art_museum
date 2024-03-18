@@ -17,13 +17,17 @@ class CreateArtMuseums extends Migration
             $table->bigIncrements('id');
             //美術館名
             $table->string('name', '255');
+            //郵便番号
+            $table->string('postalcode',8);
             //住所（都道府県）ID
-            $table->unsignedTinyInteger('prefectures_id'); // 外部キーとして使用するカラムを追加
-            $table->foreign('prefectures_id')->references('id')->on('prefectures'); // 外部キー制約を設定
+            $table->unsignedTinyInteger('prefecture_id'); // 外部キーとして使用するカラムを追加
+            $table->foreign('prefecture_id')->references('id')->on('prefectures'); // 外部キー制約を設定
             //それ以降
             $table->string('address', '255');
             //電話番号
-            $table->integer('tel');
+            $table->string('tel',20);
+            //削除フラグ
+            $table->boolean('del_flg')->default(0);
             $table->timestamps();
         });
     }

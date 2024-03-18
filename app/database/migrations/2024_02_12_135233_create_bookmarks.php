@@ -16,13 +16,15 @@ class CreateBookmarks extends Migration
         Schema::create('bookmarks', function (Blueprint $table) {
             $table->bigIncrements('id');
             //ユーザID
-            $table->unsignedBigInteger('users_id'); // 外部キーとしてユーザーIDを参照するカラム
-            $table->foreign('users_id')->references('id')->on('users'); // 外部キー制約
+            $table->unsignedBigInteger('user_id'); // 外部キーとしてユーザーIDを参照するカラム
+            $table->foreign('user_id')->references('id')->on('users'); // 外部キー制約
             //美術館ID
-            $table->unsignedBigInteger('art_museums_id'); // 外部キーとして美術館のIDを参照するカラム
-            $table->foreign('art_museums_id')->references('id')->on('art_museums'); // 外部キー制約
+            $table->unsignedBigInteger('art_museum_id'); // 外部キーとして美術館のIDを参照するカラム
+            $table->foreign('art_museum_id')->references('id')->on('art_museums'); // 外部キー制約
             //ブックマークフラグ
-            $table->boolean('bookmark_flg')->default(false); 
+            $table->boolean('bookmark_flg')->default(0); 
+            //削除フラグ
+            $table->boolean('del_flg')->default(0);
             $table->timestamps();
         });
     }

@@ -10,7 +10,7 @@
                 <div class="card-body">
                     <p class="text-center">登録が完了しました</p>
                     <div class="text-center">
-                        <a href="{{ route('museum.list') }}" class="btn btn-primary">戻る</a>
+                        <a href="{{ route('museums.index') }}" class="btn btn-primary">戻る</a>
                     </div>
                 </div>
             </div>

@@ -8,39 +8,32 @@
                 <div class="card-header text-center">来訪歴登録確認</div>
 
                 <div class="card-body">
-                    <div class="mb-3">
-                        <label for="museum_name" class="form-label">美術館名</label>
-                        <input type="text" class="form-control" id="museum_name" name="museum_name" value="{{ $museum_name }}" readonly>
-                    </div>
+                <div class="mb-3">
+                    <label for="name" class="form-label">美術館名</label>
+                    <p>{{ isset($data['name']) ? $data['name'] : '_' }}</p>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="visit_date" class="form-label">訪問日</label>
-                        <input type="text" class="form-control" id="visit_date" name="visit_date" value="{{ $visit_date }}" readonly>
-                    </div>
+                <div class="mb-3">
+                    <label for="date" class="form-label">訪問日</label>
+                    <p>{{ isset($data['date']) ? $data['date'] : '_' }}</p>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="memo" class="form-label">メモ</label>
-                        <textarea class="form-control" id="memo" name="memo" rows="5" readonly>{{ $memo }}</textarea>
-                    </div>
+                <div class="mb-3">
+                    <label for="memo" class="form-label">メモ</label>
+                    <p>{{ isset($data['memo']) ? $data['memo'] : '_' }}</p>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="image" class="form-label">画像</label>
-                        <!-- 画像表示 -->
-                        <img src="{{ $image }}" class="img-fluid" alt="画像">
-                    </div>
-
-                    <form action="{{ route('history_comp') }}" method="POST">
+                    <form action="{{ route('histories.comp') }}" method="POST">
                         @csrf
                         <!-- データを隠しフィールドとして送信 -->
-                        <input type="hidden" name="museum_name" value="{{ $museum_name }}">
-                        <input type="hidden" name="visit_date" value="{{ $visit_date }}">
-                        <input type="hidden" name="memo" value="{{ $memo }}">
-                        <input type="hidden" name="image" value="{{ $image }}">
-                        
+                        <input type="hidden" name="name" value="{{ session('history_data.name') ?? '_' }}">
+                        <input type="hidden" name="museum_id" value="{{ session('history_data.museum_id') ?? '_' }}">
+                        <input type="hidden" name="date" value="{{ session('history_data.date') ?? '_' }}">
+                        <input type="hidden" name="memo" value="{{ session('history_data.memo') ?? '_' }}">
                         <button type="submit" class="btn btn-primary">登録</button>
                     </form>
 
-                    <a href="{{ route('history_edit') }}" class="btn btn-secondary">戻る</a>
+                    <a href="{{ route('histories.create') }}" class="btn btn-secondary">戻る</a>
                 </div>
             </div>
         </div>
