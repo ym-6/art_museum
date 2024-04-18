@@ -6,12 +6,14 @@ use App\Review;
 use App\Museum;
 use App\Prefecture;
 use App\User;
+use App\Bookmark;
+use App\Like;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-use Illuminate\Support\Facades\Log; // 追加
+use Illuminate\Support\Facades\Log;
 
 class MypageController extends Controller
 {
@@ -28,31 +30,40 @@ class MypageController extends Controller
 
     public function bookmarkindex()
     {
+        // 都道府県の取得
+        $prefectures = Prefecture::all();
+    
         // ユーザーのブックマークを取得し、bookmark_flg が true のもののみ取得する
-        $bookmarks = Auth::user()->bookmarks()->where('bookmark_flg', true)->paginate(30);
+        $bookmarks = Auth::user()->bookmarks()
+            ->where('bookmark_flg', 1)
+            ->orderBy('updated_at', 'desc') // 更新日時で降順に並び替える
+            ->paginate(30);
         
         // ブックマークされた美術館の情報を取得
-        $museums = [];
-        foreach ($bookmarks as $bookmark) {
-            Log::info('Art Museum ID: ' . $bookmark->art_museums_id);
-            $museum = Museum::find($bookmark->art_museums_id);
-            if ($museum) {
-                $museums[] = $museum;
-            }
-        }
-    
+        $museumIds = $bookmarks->pluck('art_museum_id')->toArray();
+        $museums = Museum::whereIn('id', $museumIds)->get();
+        
         return view('mypages.bookmark',  [
-            'museums' => $museums
+            'museums' => $museums,
+            'bookmarks' => $bookmarks,
+            'prefectures' => $prefectures
         ]);
     }
-            
+        
     public function myreviewindex()
     {
         // いいねしたレビューを取得
-        $likedReviews = Auth::user()->likedReviews()->paginate(10);
-
+        $likedReviews = Auth::user()->likedReviews()
+            ->where('like_flg', 1)
+            ->with('like')
+            ->orderBy('updated_at', 'desc') // 更新日時で降順に並び替える
+            ->paginate(30);
+    
         // 投稿したレビューを取得
-        $postedReviews = Auth::user()->postedReviews()->paginate(10);
+        $postedReviews = Auth::user()->postedReviews()
+            ->where('del_flg', 0)
+            ->orderBy('updated_at', 'desc') // 更新日時で降順に並び替える
+            ->paginate(30);
 
         return view('mypages.myreview', [
             'likedReviews' => $likedReviews,

@@ -1,20 +1,26 @@
 <!-- CSRFトークンをmetaタグとして設定 -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <!-- Scripts -->
-<script src="{{ asset('js/.js') }}" defer></script>
+<script src="{{ asset('js/bookmark.js') }}" defer></script>
 
 @extends('layouts.navlayout')
 
 @section('content')
 <div class="container">
     <div class="row justify-content-between">
-        <!-- お気に入りアイコンを表示 -->
-        <div class="fav">
-            @auth
-            <img src="{{ asset('img/fav1.jpeg') }}" alt="お気に入り" id="favoriteIcon" data-museum-id="{{ $museum->id }}">
-            @endauth
-        </div>
-    </div>
+        @auth
+            <div class="fav">
+                <!-- ブックマークされていない場合のアイコン -->
+                <button class="favorite_icon" data-id="{{ $museum->id }}">
+                    <img src="{{ asset('img/fav1.jpeg') }}" alt="ブックマークする">
+                </button>
+
+                <!-- ブックマークされている場合のアイコン -->
+                <button class="unfavorite_icon" data-id="{{ $museum->id }}" style="display: none;">
+                    <img src="{{ asset('img/fav2.jpeg') }}" alt="ブックマークを解除する">
+                </button>
+            </div>
+        @endauth
 
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -25,18 +31,16 @@
                 <div class="card-body">
                     <div class="row">
                         <!-- 画像を表示 -->
-                        @if($images->isNotEmpty())
-                            @foreach($images as $image)
-                                <div class="col-md-4">
-                                    <img src="{{ asset($image->path) }}" class="img-fluid mb-3" alt="{{ $museum->name }}" id="image{{ $image->id }}">
-                                </div>
-                            @endforeach
+                        @if($image)
+                            <div class="col-md-4">
+                                <img src="{{ asset('/storage/' .$image->image_path) }}" class="img-fluid mb-3" alt="{{ $image->museum->name }}" id="image{{ $image->id }}">
+                            </div>
                         @else
-                        <!-- 画像が保存されていない場合、デフォルト画像を表示 -->
+                            <!-- 画像が保存されていない場合、デフォルト画像を表示 -->
                             <div class="col-md-4">
                                 <img src="{{ asset('/img/m_e_others_501.png') }}" class="img-fluid mb-3" alt="デフォルト画像" id="defaultImage">
                             </div>
-                        @endif                        
+                        @endif
                         <!-- その他の情報を表示 -->
                         <div class="col-md-8">
                             <ul class="list-group">

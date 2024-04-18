@@ -17,13 +17,15 @@ class DisplayController extends Controller
     public function index()
     {
         // メインページ
-        // 美術館の情報を取得
-        $museums = Museum::latest()->take(2)->get();
+        // 美術館の情報を取得（削除フラグがついていないもののみ）
+        $museums = Museum::where('del_flg', 0)->latest()->take(2)->get();
+    
         // 最新のレビューの情報を取得
-        $reviews = Review::latest()->take(2)->get();
+        $reviews = Review::where('del_flg', 0)->latest()->take(2)->get();
+    
         return view('main', ['museums' => $museums, 'reviews' => $reviews]);
     }
-
+    
     /**
      * Show the form for creating a new resource.
      *

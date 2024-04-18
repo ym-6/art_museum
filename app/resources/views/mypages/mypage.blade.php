@@ -21,8 +21,8 @@
                         <!-- 右側のカラム -->
                         <div class="col-md-6">
                             <p><a href="{{ route('histories.index') }}">来訪歴</a></p>
-                            <p><a href="{{ route('bookmarks.index') }}">ブックマーク</a></p>
-                            <p><a href="{{ route('myreviews.index') }}">マイレビュー</a></p>
+                            <p><a href="{{ route('bookmarks.index', ['id' => $user->id]) }}">ブックマーク</a></p>
+                            <p><a href="{{ route('myreviews.index', ['id' => $user->id]) }}">マイレビュー</a></p>
                         </div>
                     </div>
                 </div>

@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateHistory;
 use App\History;
 use App\Museum;
+use App\Image;
 use App\Review;
 use App\Prefecture;
 use App\User;
-
+use Hamcrest\Core\IsNot;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -25,27 +26,26 @@ class HistoryController extends Controller
         // 開始日と終了日をリクエストから取得
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
-
+    
         // ログインユーザーに関連する来訪履歴と美術館の情報を取得
-        $query = Auth::user()->visit_histories()->with('museum')->latest();
-
+        $query = Auth::user()->visit_histories()->with('museum');    
         // 期間が指定されている場合は期間をフィルタリング
         if ($startDate && $endDate) {
             $query->whereBetween('date', [$startDate, $endDate]);
         }
-
+    
         // 条件に合致する来訪履歴を取得
         $histories = $query->paginate(30);
-
+    
         // ページ数を取得
         $pageCount = $histories->lastPage();
-
+    
         return view('visit_histories.history_list', [
             'histories' => $histories,
             'pageCount' => $pageCount,
         ]);
     }
-
+    
     /**
      * Show the form for creating a new resource.
      *
@@ -142,7 +142,7 @@ class HistoryController extends Controller
         
         // ビューに渡すデータを取得
         $history = $histories;
-    
+
         // ビューを返す
         return view('visit_histories.history_detail', compact('history', 'museum'));
     }
@@ -194,12 +194,9 @@ class HistoryController extends Controller
      */
     public function destroy(History $histories)
     {
-        $history = $histories;
-
-        if($history){
-            $history->delete();
-        }
+        $histories->del_flg = 1; // 削除フラグを立てる
+        $histories->save();
     
-        return redirect()->route('histories.index');
+        return redirect()->route('histories.index');        
     }
 }

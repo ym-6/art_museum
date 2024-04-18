@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 
 class Image extends Model
 {
+    protected $table = 'images';
+
     protected $fillable = [
         'image_path', // 画像のパスまたはファイル名
         'art_museum_id', // 画像を所有する美術館のID

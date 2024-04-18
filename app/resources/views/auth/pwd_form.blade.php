@@ -15,7 +15,7 @@
                             @endforeach
                         </div>
                     @endif
-                    <form action="{{ route('pwd_comp.php') }}" method="POST">
+                    <form action="{{ route('pwd.comp') }}" method="POST">
                         @csrf
                         <input type="hidden" name="token" value="{{ $token }}">
                         <div class="form-group">

@@ -129,8 +129,25 @@ h6,
   font-size: 0.9rem;
 }
 
+img {
+    margin: 0; /* 画像の周りの余白をリセット */
+    padding: 0; /* 画像の周りの余白をリセット */
+}
+
 .maintitle{
   text-align: center;
+}
+
+.main_img{
+    width: 50rem;
+    height: 50rem;
+    overflow: hidden; /* 画像が指定したサイズを超えた場合には表示領域からはみ出さないようにする */
+}
+
+.main_img img {
+    width: 100%; /* 画像の幅を親要素に合わせる */
+    height: 40rem; /* 画像の高さを自動調整 */
+    overflow: hidden; /* 画像が指定したサイズを超えた場合には表示領域からはみ出さないようにする */
 }
 
 .address{
@@ -185,4 +202,27 @@ margin-right: 35rem;
 }
 .right-arrow{
   margin-left: 3rem;
+}
+
+.favorite_icon,.unfavorite_icon{
+    background-color: white; /* 背景色を青色に設定 */
+    border: none; /* ボーダーをなしに設定 */
+    cursor: pointer; /* ホバー時にポインターを表示 */
+    border-radius: 5px; /* ボタンの角を丸くする */
+}
+
+.like_icon,.unlike_icon{
+    background-color: white; /* 背景色を青色に設定 */
+    border: none; /* ボーダーをなしに設定 */
+    cursor: pointer; /* ホバー時にポインターを表示 */
+    border-radius: 5px; /* ボタンの角を丸くする */
+}
+
+
+.text-right{
+    margin-top: 2rem;
+}
+
+.d-flex{
+    margin-top: 2rem;
 }

@@ -16,16 +16,27 @@
                         </div>
                     @endif
                     <p>以下の内容で登録しますか？</p>
-                    <p>メールアドレス： {{ session('email') }}</p>
-                    <p>ユーザー名： {{ session('user_name') }}</p>
-                    <form action="{{ route('register_comp') }}" method="post">
-                        @csrf
-                        <button type="submit" class="btn btn-primary">登録</button>
-                    </form>
-                    <form action="{{ route('register') }}" method="post">
-                        @csrf
-                        <button type="submit" class="btn btn-primary">戻る</button>
-                    </form>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">メールアドレス</label>
+                        <p>{{ ($email) }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label for="user_name" class="form-label">ユーザー名</label>
+                        <p>{{ ($user_name) }}</p>
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <form action="{{ route('register.comp') }}" method="post" class="md-3">
+                            @csrf
+                            <input type="hidden" name="email" value="{{ $email }}">
+                            <input type="hidden" name="user_name" value="{{ $user_name }}">
+                            <input type="hidden" name="password" value="{{ $password }}">
+                            <button type="submit" class="btn btn-primary">登録</button>
+                        </form>
+                        <form action="{{ route('register.comp') }}" method="post" class="md-3">
+                            @csrf
+                            <button type="submit" class="btn btn-primary">戻る</button>
+                        </form>
+                    </div>
                 </div>
             </nav>
         </div>

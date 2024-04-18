@@ -8,6 +8,35 @@
         </div>
     </div>
 
+    <div class="row mt-4 align-items-center">
+    <!-- キーワード検索 -->
+    <form action="{{ route('posts.index') }}" method="GET" class="mb-4">
+    <div class="col-md-6">
+        <div class="row">
+            <div class="col-md-8 mb-2">
+                <input type="text" name="keyword" id="keyword" class="form-control" placeholder="投稿検索">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">検索</button>
+            </div>
+        </div>
+    </div>
+    <!-- 並べ替えセレクトボックス -->
+    <div class="col-md-3 mb-2">
+        <div class="input-group">
+            @csrf
+            <select class="form-select" name="sort_type" onchange="this.form.submit()">
+                <option selected disabled>並べ替え</option>
+                <option value="posted_asc">登録順（昇順）</option>
+                <option value="posted_desc">登録順（降順）</option>
+                <option value="like_asc">いいね順（昇順）</option>
+                <option value="like_desc">いいね順（降順）</option>
+            </select>
+        </div>
+    </div>
+    </form>
+</div>
+
     <div class="row mt-4">
         <div class="col-md-12">
             <table class="table table-bordered">
@@ -15,28 +44,35 @@
                     <tr>
                         <th>投稿ID</th>
                         <th>ユーザ名</th>
-                        <th>レビュー</th>
+                        <th>タイトル/メモ</th>
                         <th>投稿日時</th>
                         <th>いいね数</th>
                         <th>投稿詳細</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($posts as $post)
-                        <tr>
-                            <td>{{ $post->id }}</td>
-                            <!-- ユーザ名の表示 -->
-                            <td>{{ $post->user->name }}</td>
-                            <!-- レビュータイトルの表示 -->
-                            <td>{{ $post->reviews->title }}</td>
-                            <!-- 投稿日時の表示 -->
-                            <td>{{ $post->posted_at }}</td>
-                            <!-- いいね数の表示 -->
-                            <td>{{ $post->like_count }}</td>
-                            <!-- 投稿詳細のリンク -->
-                            <td><a href="{{ route('mypages.index', ['user_id' => $post->user_id]) }}">詳細</a></td>
-                        </tr>
-                    @endforeach
+                @foreach ($users as $user)
+    @foreach ($user->reviews as $review)
+        <tr>
+            <td>{{ $review->id }}</td>
+            <td>{{ $user->user_name }}</td>
+            <td>{{ $review->title }}</td>
+            <td>{{ $review->created_at }}</td>
+            <td>@foreach ($likedreviews as $likedreview){{ $likedreviews->like_flg }}@endforeach</td>
+            <td><a href="{{ route('reviews.show', ['reviews' => $review->id]) }}">詳細</a></td>
+        </tr>
+    @endforeach
+    @foreach ($user->histories as $history)
+        <tr>
+            <td>{{ $history->id }}</td>
+            <td>{{ $user->user_name }}</td>
+            <td>{{ $history->memo }}</td>
+            <td>{{ $history->created_at }}</td>
+            <td></td>
+            <td><a href="{{ route('histories.show', ['histories' => $history->id]) }}">詳細</a></td>
+        </tr>
+    @endforeach
+@endforeach
                 </tbody>
             </table>
         </div>
@@ -45,7 +81,7 @@
     <!-- ページネーションリンクを表示 -->
     <div class="row">
         <div class="col-md-12">
-            {{ $posts->links() }}
+            {{ $users->links() }}
         </div>
     </div>
 </div>

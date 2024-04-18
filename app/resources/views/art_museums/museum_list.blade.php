@@ -11,7 +11,7 @@
             <div class="row justify-content-center">
                 <!-- 都道府県検索 -->
                 <div class="col-md-3 mb-3">
-                    <select class="form-select" id="prefecture_id" name="prefecture_id">
+                    <select class="form-select" id="prefecture" name="prefecture">
                         <option value="">都道府県を選択してください</option>
                         @isset($prefectures)
                             @foreach($prefectures as $prefecture)
@@ -32,7 +32,6 @@
         </form>
 
             <!-- 美術館情報を表示 -->
-            <div class="row">
                 @foreach ($museums as $museum)
                 <div class="col-md-12"> 
                     <a href="{{ route('museums.show', $museum -> id) }}">

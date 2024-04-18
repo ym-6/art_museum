@@ -28,8 +28,6 @@ class CreateUserMuseum extends Migration
         
             // いいねフラグ
             $table->boolean('like_flg')->default(0);
-            //削除フラグ
-            $table->boolean('del_flg')->default(0);
 
             $table->timestamps();
 

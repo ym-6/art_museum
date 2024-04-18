@@ -6,14 +6,12 @@ use App\Http\Requests\CreateMuseum;
 use App\Museum;
 use App\Prefecture;
 use App\Image;
-use App\Review;
+use App\Bookmark;
 use App\User;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
-use Illuminate\Support\Facades\Log; // 追加
 
 
 class MuseumController extends Controller
@@ -27,44 +25,43 @@ class MuseumController extends Controller
     {
         // 都道府県の取得
         $prefectures = Prefecture::all();
-
+    
         // 検索条件
-        $query = Museum::query();
-
+        $query = Museum::where('del_flg', 0);
+    
         // キーワードの取得
         $keyword = $request->input('keyword');
-
-        // 都道府県の取得
+    
+        // 検索リスト用都道府県の取得
         $prefecture = $request->input('prefecture');
 
         // もしキーワードが指定されている場合、キーワード検索条件を追加
         if ($keyword) {
             $query->where('name', 'like', '%' . $keyword . '%');
         }
-
+    
         // もし都道府県が指定されている場合、都道府県検索条件を追加
         if ($prefecture) {
-            $query->whereHas('prefecture', function (Builder $query) use ($prefecture) {
-                $query->where('id', $prefecture);
+            $query->whereHas('prefecture', function ($q) use ($prefecture) {
+                $q->where('id', $prefecture);
             });
         }
-
         // 結果を取得
-        $museums = $query->latest()->paginate(30);
-
+        $museums = $query->orderByDesc('id')->paginate(30);
+    
         // ページ数を取得
         $pageCount = $museums->lastPage();
-
+    
         // 美術館一覧ビューを返す
         return view('art_museums.museum_list', [
             'museums' => $museums,
             'prefectures' => $prefectures,
             'prefecture' => $prefecture,
             'keyword' => $keyword,
-            'pageCount' => $pageCount
+            'pageCount' => $pageCount,
         ]);
     }
-
+    
     /**
      * Show the form for creating a new resource.
      *
@@ -153,7 +150,7 @@ class MuseumController extends Controller
         if ($request->hasFile('image')) {
             // 画像を保存
             $image = $request->file('image');
-            $path = $image->store('public/img');
+            $path = $image->store('img','public');
             // データベースに画像の情報を保存
             Image::create([
                 'image_path' => $path,
@@ -166,6 +163,7 @@ class MuseumController extends Controller
             'data' => $data, // データをビューに渡す
         ]);
     }
+    
     /**
      * Display the specified resource.
      *
@@ -174,14 +172,21 @@ class MuseumController extends Controller
      */
     public function show(Museum $museum)
     {    
-        // 美術館に関連する画像を取得
-        $images = Image::where('art_museum_id', $museum->id)->get();
+        // 美術館に関連する最初の画像を取得
+        $image = Image::where('art_museum_id', $museum->id)->first();
+    
+        // ユーザーがログインしている場合、ブックマークの状態を取得
+        $isBookmarked = auth()->check() ? Bookmark::where('user_id', auth()->id())
+                                                ->where('art_museum_id', $museum->id)
+                                                ->exists() : false;
+    
         return view('art_museums.museum_detail', compact(
             'museum',
-            'images'
+            'image', 
+            'isBookmarked'
         )); 
     }
-
+    
     /**
      * Show the form for editing the specified resource.
      *
@@ -207,7 +212,7 @@ class MuseumController extends Controller
         if ($request->hasFile('image')) {
             // 画像を保存
             $image = $request->file('image');
-            $path = $image->store('public/img');
+            $path = $image->store('img','public');
             $user_id = Auth::id();
             // データベースに画像の情報を保存
             Image::create([
@@ -230,10 +235,9 @@ class MuseumController extends Controller
      */
     public function destroy(Museum $museum)
     {
-        if($museum){
-            $museum->delete();
-        }
-
-        return redirect()->route('museums.index');
+        $museum->del_flg = 1; // 削除フラグを立てる
+        $museum->save();
+    
+        return redirect()->route('museums.index');        
     }
 }

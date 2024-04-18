@@ -16,6 +16,8 @@ class Museum extends Model
         'tel',  //電話番号
         'user_id',  //作成ユーザーID
         'del_flg',  //削除フラグ
+        'image_path', // 画像のパスまたはファイル名
+    
     ];
 
     public function user()
@@ -27,7 +29,6 @@ class Museum extends Model
     {
         return $this->belongsTo(Prefecture::class, 'prefecture_id');
     }
-    
 
     public function reviews()
     {
@@ -42,6 +43,11 @@ class Museum extends Model
     public function images()
     {
         return $this->hasMany(Image::class, 'art_museum_id');
+    }
+
+    public function likestore()
+    {
+        return $this->hasMany(Like::class, 'art_museum_id');
     }
 
 }

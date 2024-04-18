@@ -64,12 +64,12 @@
                     </td>
                     <td>
                     <div class="d-flex align-items-center">
-                            <form action="{{ route('users.destroy', ['id' => $user->id]) }}" method="post">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('本当に削除しますか？')">削除</button>
-                            </form>
-                        </div>
+                        <form action="{{ route('users.destroy', $user->id) }}" method="post">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('本当に削除しますか？')">削除</button>
+                        </form>
+                    </div>
                     </td>                
                 </tr>
                 @endforeach

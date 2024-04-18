@@ -5,6 +5,9 @@ namespace App;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Auth\Passwords\CanResetPassword;
+
+
 
 class User extends Authenticatable
 {
@@ -50,13 +53,11 @@ class User extends Authenticatable
         'is_admin' => 0,
     ];
 
-    // museumsテーブルとの関連付け
     public function art_museums()
     {
         return $this->belongsTo(ArtMuseums::class, 'museum_id');
     }
     
-    // reviewsテーブルとの関連付け
     public function review()
     {
         return $this->belongsTo(Reviews::class, 'review_id');
@@ -81,15 +82,25 @@ class User extends Authenticatable
         return $this->hasMany(History::class);
     }
 
-    // ユーザーが投稿したレビューを取得
     public function postedReviews()
     {
         return $this->hasMany(Review::class, 'user_id');
     }
             
-    // ユーザーがいいねしたレビューを取得
     public function likedReviews()
     {
-        return $this->hasMany(Review::class, 'user_id', 'review_id', 'like_flg');
+        return $this->hasMany(Like::class, 'user_id')->where('like_flg', true);
     }
+    
+    public function myreview()
+    {
+        return $this->hasMany(Like::class, 'review_id');
+    }
+
+    public function user_museum()
+    {
+        return $this->hasOne(Like::class);
+    }
+
+
 }

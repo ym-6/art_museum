@@ -9,13 +9,19 @@
 @section('content')
 <div class="container">
     <div class="row justify-content-between">
-        <!-- お気に入りアイコンを表示 -->
-        <div class="nice">
-            @auth
-            <img src="{{ asset('img/nice1.jpeg') }}" alt="お気に入り" id="likeIcon" data-museum-id="{{ $museum->id }}">
-            @endauth
+    @auth
+        <div class="fav">
+            <!-- いいねされていない場合のアイコン -->
+            <button class="like_icon" data-review-id="{{ $reviews->id }}" data-museum-id="{{ $reviews->museum->id }}">
+                <img src="{{ asset('img/like1.jpeg') }}" alt="いいねする">
+            </button>
+
+            <!-- いいねされている場合のアイコン -->
+            <button class="unlike_icon" data-review-id="{{ $reviews->id }}" data-museum-id="{{ $reviews->museum->id }}" style="display: none;">
+                <img src="{{ asset('img/like2.jpeg') }}" alt="いいねを解除する">
+            </button>
         </div>
-    </div>
+    @endauth
 
     <!-- レビュー詳細 -->
     <div class="row justify-content-center">
@@ -51,22 +57,3 @@
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    // お気に入りアイコンのクリックイベントを処理する
-    document.getElementById('niceIcon').addEventListener('click', function() {
-        // ここにお気に入りの非同期通信処理を記述
-        // 仮に非同期処理が成功した場合、お気に入りアイコンの画像を切り替える
-        var icon = document.getElementById('niceIcon');
-        // お気に入りの状態によって画像を切り替える
-        if (icon.src.includes('nice1.jpeg')) {
-            // お気に入りに追加済みの状態の場合、画像2に切り替える
-            icon.src = "{{ asset('img/nice2.jpeg') }}";
-        } else {
-            // お気に入りに未追加の状態の場合、画像1に切り替える
-            icon.src = "{{ asset('img/nice1.jpeg') }}";
-        }
-    });
-</script>
-@endpush

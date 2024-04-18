@@ -132,8 +132,21 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    public function destroyform($id)
+    {
+        $user = User::findOrFail($id);
+        return view('mypages.user_delete_conf', compact('user'));
+    }
+    
     public function destroy($id)
     {
-        //
+        $user = User::findOrFail($id);
+        $user->del_flg = 1; // 削除フラグを立てる
+        $user->save();
+    
+        // ログアウト処理
+        Auth::logout();
+    
+        return redirect()->route('index');        
     }
 }

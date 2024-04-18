@@ -20,7 +20,7 @@ class Review extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'like_flg', 'user_id');
+        return $this->belongsTo(User::class);
     }
 
     public function museum()
@@ -31,6 +31,26 @@ class Review extends Model
     public function prefecture()
     {
         return $this->belongsTo(Prefecture::class, 'prefecture_id');
+    }
+
+    public function likestore()
+    {
+        return $this->hasMany(Like::class, 'review_id');
+    }
+
+    public function review()
+    {
+        return $this->belongsTo(Review::class, 'review_id');
+    }
+
+    public function likes()
+    {
+        return $this->hasMany(Like::class, 'review_id');
+    }
+
+    public function myreview()
+    {
+        return $this->hasMany(Like::class, 'review_id');
     }
 
 

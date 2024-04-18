@@ -6,6 +6,7 @@ use App\Review;
 use App\User;
 use App\History;
 use App\Museum;
+use App\Like;
 use App\SearchPost;
 use App\SearchUser;
 
@@ -34,29 +35,21 @@ class OwnerController extends Controller
     {
         // 権限チェック
         $this->authorize('usersindex', User::class);
-
-        // 検索条件
-        $query = User::query();
-
+    
+        // ユーザーのクエリビルダーを作成
+        $query = User::where('del_flg', 0);
+    
         // キーワードの取得
         $keyword = $request->input('keyword');
-
+    
         // もしキーワードが指定されている場合、キーワード検索条件を追加
         if ($keyword) {
-            $query->where('name', 'like', '%' . $keyword . '%');
+            $query->where('user_name', 'like', '%' . $keyword . '%');
         }
         
         // 並び替えオプションの取得
         $sortType = $request->input('sort_type');
-
-        // ユーザーのクエリビルダーを作成
-        $query = User::query();
-
-        // キーワードがある場合は検索条件を追加
-        if ($keyword) {
-            $query->where('user_name', 'like', "%$keyword%");
-        }
-
+    
         // 並び替え
         switch ($sortType) {
             case 'posted_asc':
@@ -76,13 +69,13 @@ class OwnerController extends Controller
                 $query->orderBy('id', 'asc');
                 break;
         }
-
+    
         // ページネーションを実行
         $users = $query->withCount('reviews', 'histories')->paginate(30);
-
+    
         return view('owner.user_list', compact('users', 'keyword'));
     }
-    
+        
     /**
      * Display a listing of the posts.
      *
@@ -92,10 +85,18 @@ class OwnerController extends Controller
     {
         // 権限チェック
         $this->authorize('usersindex', User::class);
-    
+        
+        $likedreviews = Like::with('review')
+        ->where('like_flg', 1) // いいねされたもののみ取得する例
+        ->get();
+
         // 検索条件
-        $query = SearchPost::query();
-            
+        $query = User::whereHas('reviews', function ($query) {
+            $query->where('del_flg', 0);
+        })->whereHas('histories', function ($query) {
+            $query->where('del_flg', 0);
+        });
+                       
         // キーワードの取得
         $keyword = $request->input('keyword');
             
@@ -109,30 +110,36 @@ class OwnerController extends Controller
             
         // 並び替え
         switch ($sortType) {
-        case 'posted_asc':
-            $query->orderBy('created_at', 'asc');
-            break;
-        case 'posted_desc':
-            $query->orderBy('created_at', 'desc');
-            break;
-        case 'like_asc':
-            $query->orderBy('like_flg', 'asc');
-            break;
-        case 'like_desc':
-            $query->orderBy('like_flg', 'desc');
-            break;
-        default:
-            // デフォルトはIDで昇順
-            $query->orderBy('id', 'asc');
-            break;
+            case 'posted_asc':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'posted_desc':
+                $query->orderBy('created_at', 'desc');
+                break;
+            case 'like_asc':
+                $query->orderBy('user_museum.like_flg', 'asc');
+                break;
+            case 'like_desc':
+                $query->orderBy('user_museum.like_flg', 'desc');
+                break;
+            default:
+                // デフォルトはIDで昇順
+                $query->orderBy('id', 'asc');
+                break;
         }
-            
+        
         // ページネーションを実行
-        $posts = $query->paginate(30);
-            
-        return view('owner.post_list', compact('posts'));
+        $users = $query->paginate(30);
+    
+        // 各ユーザーに関連するレビューと来訪歴を事前に取得しておく
+        $users->load('reviews', 'histories');
+    
+        return view('owner.post_list', compact(
+            'users',
+            'likedreviews'
+        ));
     }
-
+        
     /**
      * Show the form for creating a new resource.
      *
@@ -196,6 +203,10 @@ class OwnerController extends Controller
      */
     public function usersdestroy($id)
     {
-        //
+        $user = User::findOrFail($id);
+        $user->del_flg = 1; // 削除フラグを立てる
+        $user->save();
+    
+        return redirect()->route('users.index');        
     }
 }

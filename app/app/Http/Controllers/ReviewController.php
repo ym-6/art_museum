@@ -7,6 +7,8 @@ use App\Review;
 use App\Museum;
 use App\Prefecture;
 use App\User;
+use App\Like;
+
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,7 +33,7 @@ class ReviewController extends Controller
         $museum = Museum::select('id', 'prefecture_id', 'name')->get();
 
         // レビューの検索クエリを生成
-        $query = Review::query();
+        $query = Review::where('del_flg', 0);
 
         // 検索結果を取得し、ページネーションを適用
         $reviews = $query->latest()->paginate(30);
@@ -148,7 +150,19 @@ class ReviewController extends Controller
     public function show(Review $reviews)
     {
         $museum = $reviews->museum;
-        return view('reviews.review_detail', compact('reviews', 'museum'));
+
+        // ユーザーがログインしている場合、いいねの状態を取得
+        $isLiked = auth()->check() ? Like::where('user_id', auth()->id())
+                                        ->where('art_museum_id', $museum->id)
+                                        ->where('review_id', $reviews->id)
+                                        ->exists() : false;
+
+        
+        return view('reviews.review_detail', compact(
+            'reviews', 
+            'museum',
+            'isLiked'
+        ));
     }
 
     /**
@@ -173,7 +187,7 @@ class ReviewController extends Controller
      */
     public function update(CreateReview $request, Review $reviews)
     {
-        $data = $request->validated(); // バリデーションを通過したデータを取得
+        $data = $request->validated();
     
         $reviews->update([
             'title' => $data['title'],
@@ -191,11 +205,9 @@ class ReviewController extends Controller
      */
     public function destroy(Review $reviews)
     {
-        if($reviews){
-            $reviews->delete();
-        }
-
-        return redirect()->route('reviews.index');
-
+        $reviews->del_flg = 1; // 削除フラグを立てる
+        $reviews->save();
+    
+        return redirect()->route('reviews.index');        
     }
 }

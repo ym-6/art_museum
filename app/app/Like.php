@@ -10,19 +10,20 @@ class Like extends Model
 
     protected $fillable = ['art_museum_id', 'user_id', 'review_id', 'like_flg'];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+    protected $primaryKey = 'user_id';
 
     public function museum()
     {
-        return $this->belongsTo(Museum::class, 'art_museum_id');
+        return $this->belongsTo(Museum::class);
+    }
+
+    public function like()
+    {
+        return $this->belongsTo(Review::class);
     }
 
     public function review()
     {
-        return $this->belongsTo(Review::class, 'review_id', 'like_flg');
+        return $this->belongsTo(Review::class);
     }
-
 }

@@ -32,4 +32,5 @@ class SearchPost extends Model
     {
         return $this->belongsTo(History::class);
     }
+    
 }

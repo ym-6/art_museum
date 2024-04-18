@@ -39,7 +39,7 @@
                 <div class="text-center">
                     <button type="submit" class="btn btn-primary mx-2">入力確認</button>
                     <a href="{{ route('mypages.index') }}" class="btn btn-secondary mx-2">戻る</a>
-                    <a href="{{ route('mypages.destroy', $user->id) }}" class="btn btn-danger mx-2" onclick="return confirm('アカウントを削除してもよろしいですか？')">アカウント削除</a>
+                    <a href="{{ route('mypages.destroyform', $user->id) }}" class="btn btn-danger mx-2">アカウント削除</a>
                 </div>
             </form>
         </nav>

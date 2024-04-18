@@ -36,7 +36,7 @@
                     <div class="mb-3">
                         <label for="image" class="form-label">美術館画像</label>
                         @if(isset($image))
-                            <img src="{{ $image }}" class="img-fluid" alt="{{ isset($data['image']) ? $data['image'] : ''}}">
+                            <img src="{{ asset('storage/' . $image) }}" class="img-fluid" alt="{{ isset($data['image']) ? $data['image'] : ''}}">
                         @else
                             <p>画像がありません</p>
                         @endif

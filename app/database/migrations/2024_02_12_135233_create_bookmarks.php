@@ -23,8 +23,6 @@ class CreateBookmarks extends Migration
             $table->foreign('art_museum_id')->references('id')->on('art_museums'); // 外部キー制約
             //ブックマークフラグ
             $table->boolean('bookmark_flg')->default(0); 
-            //削除フラグ
-            $table->boolean('del_flg')->default(0);
             $table->timestamps();
         });
     }

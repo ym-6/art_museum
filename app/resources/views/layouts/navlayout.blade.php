@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
 
     <!-- Styles -->
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <link href="{{ asset('/css/app.css') }}" rel="stylesheet">
 
     <!-- BootstrapのCSS読み込み -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
@@ -46,7 +46,7 @@
                         <a href="{{ route('reviews.index') }}" class="nav-link text-end">レビュー一覧</a>
                     </li>
                 </ul>
-                <div class="my-navbar-control d-flex">
+                <div class="my-navbar-control d-flex mb-4">
                     @if(Auth::check())
                         <a href="{{ route('mypages.index') }}" class="btn btn-primary me-3">マイページ</a>
                         <a href="#" id="logout" class="btn btn-danger">ログアウト</a>

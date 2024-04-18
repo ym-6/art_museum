@@ -1,3 +1,7 @@
+<!-- Scripts -->
+<script src="{{ asset('js/main.js') }}" defer></script>
+
+
 @extends('layouts.navlayout')
 
 @section('content')
@@ -64,89 +68,6 @@
         </div>
     </div>
 
-    <!-- TOPに戻るボタン -->
-    <div class="row mt-4" id="topButtonRow">
-        <div class="col-md-12 text-left">
-            <button onclick="topFunction()" class="btn btn-primary">TOPに戻る</button>
-        </div>
-    </div>
 </div>
 @endsection
 
-<script>
-    var imagePaths = [
-        "{{ asset('/img/27409714_s.jpg') }}",
-        "{{ asset('/img/28873208_s.jpg') }}",
-        "{{ asset('/img/28942553_s.jpg') }}",
-        "{{ asset('/img/29028774_s.jpg') }}"
-    ];
-
-    // 現在の画像のインデックスを追跡します
-    var currentImageIndex = 0;
-
-    // メイン画像のsrc属性を更新する関数
-    function updateMainImage() {
-        var mainImage = document.getElementById('main');
-        mainImage.style.opacity = 0; // フェードインのために透明度を0に設定
-        mainImage.src = imagePaths[currentImageIndex];
-        // フェードイン効果を実行
-        fadeIn(mainImage);
-    }
-
-    // 画像を切り替える関数
-    function changeImage(direction) {
-        currentImageIndex += direction;
-        // インデックスが画像の範囲外にならないようにします
-        if (currentImageIndex < 0) {
-            currentImageIndex = imagePaths.length - 1;
-        } else if (currentImageIndex >= imagePaths.length) {
-            currentImageIndex = 0;
-        }
-        // メイン画像を更新します
-        updateMainImage();
-    }
-
-    // フェードイン効果を実行する関数
-    function fadeIn(element) {
-        var opacity = 0;
-        var intervalId = setInterval(function() {
-            if (opacity < 1) {
-                opacity += 0.1;
-                element.style.opacity = opacity;
-            } else {
-                clearInterval(intervalId);
-            }
-        }, 50); // フェードインの速度を調整するための時間間隔
-    }
-</script>
-
-<script>
-// ページが読み込まれた時に実行
-window.onload = function() {
-  // ボタン要素を取得
-  var topButtonRow = document.getElementById("topButtonRow");
-  // 初期位置を設定
-  topButtonRow.style.bottom = "20px";
-  topButtonRow.style.right = "20px";
-  // ボタンが画面をスクロールすると表示/非表示を切り替える
-  window.onscroll = function() {
-    scrollFunction(topButtonRow);
-  };
-};
-
-function scrollFunction(topButtonRow) {
-  if (document.body.scrollTop > 10 || document.documentElement.scrollTop > 10) {
-    // スクロールが10以上の場合、ボタンを表示
-    topButtonRow.style.display = "block";
-  } else {
-    // スクロールが10以下の場合、ボタンを非表示
-    topButtonRow.style.display = "none";
-  }
-}
-
-// ボタンをクリックするとTOPに戻る
-function topFunction() {
-  document.body.scrollTop = 0;
-  document.documentElement.scrollTop = 0;
-}
-</script>

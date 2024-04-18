@@ -18,44 +18,39 @@
             <!-- タブのコンテンツ -->
             <div class="tab-content">
                 <!-- いいねしたレビュー -->
-                <div class="tab-pane fade show active" id="liked_reviews">
+                <div class="tab-pane fade" id="liked_reviews">
                     @foreach ($likedReviews as $likedReview)
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <p class="card-title">{{ $likedReview->museum_name }}</p>
-                            <h5 class="card-title">{{ $likedReview->review_title }}</h5>
-                            <p class="card-text">
-                                <a href="{{ route('reviews.show', ['reviews' => $likedReview->id]) }}">
-                                    {{ substr($likedReview->review_body, 0, 50) }}{{ strlen($likedReview->review_body) > 50 ? "..." : "" }}
-                                </a>
-                            </p>
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                @if ($likedReview->review) 
+                                    <a href="{{ route('reviews.show', ['reviews' => $likedReview->review->id]) }}">
+                                        <p class="card-title">{{ $likedReview->review->museum->name }}</p>
+                                        <h5 class="card-title">{{ $likedReview->review->title }}</h5>
+                                        <p class="card-text">{{ $likedReview->review->body }}</p>
+                                    </a>
+                                @else
+                                    <p>いいねしたレビューはありません。</p>
+                                @endif
+                            </div>
                         </div>
-                    </div>
                     @endforeach
-                    {{ $likedReviews->links() }}
                 </div>
 
                 <!-- 投稿したレビュー -->
                 <div class="tab-pane fade" id="posted_reviews">
-                    @if ($postedReviews->isEmpty())
-                        <p>投稿したレビューはありません。</p>
-                    @else
-                        @foreach ($postedReviews as $postedReview)
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <p class="card-title">{{ $postedReview->museum_name }}</p>
-                                    <h5 class="card-title">{{ $postedReview->review_title }}</h5>
-                                    <p class="card-text">
-                                        <a href="{{ route('reviews.show', ['reviews' => $postedReview->id]) }}">
-                                        {{ substr($postedReview->review_body, 0, 50) }}{{ strlen($postedReview->review_body) > 50 ? "..." : "" }}
-                                        </a>
-                                    </p>
-                                </div>
+                    @foreach ($postedReviews as $postedReview)
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <a href="{{ route('reviews.show', ['reviews' => $postedReview->id]) }}">
+                                    <p class="card-title">{{ $postedReview->museum->name }}</p>
+                                    <h5 class="card-title">{{ $postedReview->title }}</h5>
+                                    <p class="card-text">{{ $postedReview->body }}</p>
+                                </a>
                             </div>
-                        @endforeach
-                        {{ $postedReviews->links() }}
-                    @endif
-                </div>                
+                        </div>
+                    @endforeach
+                </div>
+                
             </div>
         </div>
     </div>
