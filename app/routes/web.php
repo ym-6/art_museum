@@ -10,7 +10,7 @@ use App\Http\Controllers\FlagController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
-
+use App\Http\Controllers\Auth\ResetPasswordController;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -39,8 +39,10 @@ Route::get('password/email', [App\Http\Controllers\Auth\ForgotPasswordController
 Route::post('password/email', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 // パスワードリセットメール送信完了ページ
 Route::get('password/email/send', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkResponse'])->name('email.send');
+// パスワードリセットフォームの表示
+Route::get('password/reset/{token}', [App\Http\Controllers\Auth\ResetPasswordController::class, 'showResetForm'])->name('password.reset');
 // パスワードリセットフォームの送信
-Route::post('password/reset', [App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->name('pwd.comp');
+Route::post('password/reset', [App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->name('password.update');
 
 
 // MuseumControllerのルート

@@ -223,6 +223,7 @@ class MuseumController extends Controller
         }
     
         $museum->update($request->except('image'));
+
     
         return redirect()->route('museums.show', $museum->id);
     }
