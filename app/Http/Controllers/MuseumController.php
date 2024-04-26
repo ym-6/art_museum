@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateMuseum;
 use App\Museum;
 use App\Prefecture;
-use App\Review;
+use App\Image;
+use App\Bookmark;
 use App\User;
 
-
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 
 class MuseumController extends Controller
 {
@@ -19,45 +23,45 @@ class MuseumController extends Controller
      */
     public function index(Request $request)
     {
+        // 都道府県の取得
+        $prefectures = Prefecture::all();
+    
+        // 検索条件
+        $query = Museum::where('del_flg', 0);
+    
         // キーワードの取得
         $keyword = $request->input('keyword');
-
-        // 都道府県の取得
+    
+        // 検索リスト用都道府県の取得
         $prefecture = $request->input('prefecture');
 
-        // 検索が行われた場合
-        if ($keyword || $prefecture) {
-        // クエリビルダーを使用して検索条件を組み立てる
-            $query = Museum::query();
-
-        // キーワード検索
+        // もしキーワードが指定されている場合、キーワード検索条件を追加
         if ($keyword) {
-            $query -> where('name', 'like', '%' . $keyword . '%');
+            $query->where('name', 'like', '%' . $keyword . '%');
         }
-
-        // 都道府県検索
+    
+        // もし都道府県が指定されている場合、都道府県検索条件を追加
         if ($prefecture) {
-            $query -> where('prefecture_id', $prefecture);
+            $query->whereHas('prefecture', function ($q) use ($prefecture) {
+                $q->where('id', $prefecture);
+            });
         }
-
         // 結果を取得
-            $museums = $query -> get();
-        } else {
-            // 検索が行われなかった場合はすべての美術館を取得
-            $museums = Museum::all();
-        }
-
-        $museums = Museum::latest()->paginate(30);
+        $museums = $query->orderByDesc('id')->paginate(30);
+    
         // ページ数を取得
-        $pageCount = $museums -> lastPage();
-
+        $pageCount = $museums->lastPage();
+    
         // 美術館一覧ビューを返す
         return view('art_museums.museum_list', [
-            'museums' => $museums, 
-            'pageCount' => $pageCount
+            'museums' => $museums,
+            'prefectures' => $prefectures,
+            'prefecture' => $prefecture,
+            'keyword' => $keyword,
+            'pageCount' => $pageCount,
         ]);
     }
-
+    
     /**
      * Show the form for creating a new resource.
      *
@@ -65,92 +69,134 @@ class MuseumController extends Controller
      */
     public function create()
     {
-        $prefectures = Prefecture::all();
+        // ログインしているかどうかを確認
+        if (Auth::check()) {
+
+            $prefectures = Prefecture::all();
+
+            // ビューにデータを渡して入力画面を表示する
+            return view('museum_forms.museum_reg', compact('prefectures'));
+        } else {
+            // ログインしていない場合はログインページにリダイレクト
+            return redirect()->route('login');
+        }
+    }
     
-        // ビューにデータを渡して入力画面を表示
-        return view('museum_forms.museum_reg', [
-            'prefectures' => $prefectures,
+        /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(CreateMuseum $request)
+    {
+        // バリデーション済みのデータを取得
+        $data = $request->validated();
+    
+        // アップロードされた画像を取得
+        $image = $request->file('image');
+    
+        // 画像がアップロードされている場合は一時保存
+        $imagePath = null;
+        if ($image) {
+            // 一時的な保存場所に画像を移動
+            $imagePath = $image->store('temporary_images', 'public');
+        }
+    
+        // 入力画面で選択された都道府県のIDを取得
+        $selectedPrefectureId = $data['prefecture_id'];
+    
+        // 都道府県IDに対応する都道府県を取得
+        $prefecture = Prefecture::find($selectedPrefectureId);
+    
+        // 都道府県が存在するかを確認し、存在しない場合は'Unknown'を設定
+        if ($prefecture) {
+            $prefectureName = $prefecture->name;
+        } else {
+            $prefectureName = 'Unknown';
+        }
+    
+        // セッションにデータを保存
+        session()->put('data', $data);
+        session()->put('image', $imagePath); // 画像パスをセッションに保存
+    
+        // 入力内容と都道府県名をビューに渡して確認画面を表示する
+        return view('museum_forms.museum_conf', [
+            'data' => $data,
+            'prefecture' => $prefectureName,
+            'image_path' => $imagePath // 画像のパスをビューに渡す
         ]);
     }
-
-    // 入力画面
-    public function store(Request $request)
-    {
-        $request->validate([
-            'museum_name' => 'required',
-            'postalcode' => 'required|integer',
-            'prefecture_id' => 'required',
-            'address' => 'required',
-            'tel' => 'required|integer',
-            'image' => 'nullable|image',
-        ]);
-                    
-        // 入力されたデータをセッションに一時保存
-        $request->session()->put('museum_data', $request->all());
-
-        return redirect()->route('museum_forms.museum_conf');
-    }
-
-    // 確認画面
-    public function configuration(Request $request)
-    {
-        // セッションから保存されたデータを取得
-        $museumdata = $request->session()->get('museum_data');
-
-        // $museumdata が null の場合のデフォルト値を設定
-        $museum_name = $museumdata['museum_name'] ?? '';
-        $postalcode = $museumdata['postalcode'] ?? '';
-        $prefecture = $museumdata['prefecture'] ?? '';
-        $address = $museumdata['address'] ?? '';
-        $tel = $museumdata['tel'] ?? '';
-        $image = $museumdata['image'] ?? '';
-
-        // ビューにデータを渡して確認画面を表示
-        return view('museum_forms.museum_conf', compact(
-            'museum_name', 
-            'postalcode', 
-            'prefecture', 
-            'address', 
-            'tel', 
-            'image'
-        ));
-    }
-
-    // 完了画面
+    
     public function complete(Request $request)
     {
-        $museumdata = $request->session()->get('museum_data');
-
-        $request -> Museum();
-
-        // データベースへの登録が完了したらセッションをクリア
-        $request->session()->forget('museum_data');
-
-        // 完了画面を表示
-        return view('museum_forms.museum_comp');
+        // セッションからデータを取得
+        $data = session('data', []);
+    
+        // データベースに美術館情報を保存
+        $museum = new Museum();
+        $museum->name = $data['name'];
+        $museum->prefecture_id = $data['prefecture_id'];
+        $museum->postalcode = $data['postalcode'];
+        $museum->address = $data['address'];
+        $museum->tel = $data['tel'];
+        $museum->save();
+        
+        // 保存した美術館のIDを取得
+        $museum_id = $museum->id;
+    
+        
+        // 画像が添付されているかどうかを確認
+        if ($request->hasFile('image')) {
+            // 画像を保存
+            $image = $request->file('image');
+            $path = $image->store('img','public');
+            // データベースに画像の情報を保存
+            Image::create([
+                'image_path' => $path,
+                'art_museum_id' => $museum_id
+            ]);
+        }
+        
+        // ビューを返す
+        return view('museum_forms.museum_comp', [
+            'data' => $data, // データをビューに渡す
+        ]);
     }
-
+    
     /**
      * Display the specified resource.
      *
      * @param  \App\Models\Museum  $museum
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-    {
-        $museums = Museum::findOrFail($id);
-        return view('art_museums.museum_detail', ['museums' => $museums]);
+    public function show(Museum $museum)
+    {    
+        // 美術館に関連する最初の画像を取得
+        $image = Image::where('art_museum_id', $museum->id)->first();
+    
+        // ユーザーがログインしている場合、ブックマークの状態を取得
+        $isBookmarked = auth()->check() ? Bookmark::where('user_id', auth()->id())
+                                                ->where('art_museum_id', $museum->id)
+                                                ->exists() : false;
+    
+        return view('art_museums.museum_detail', compact(
+            'museum',
+            'image', 
+            'isBookmarked'
+        )); 
     }
-        
+    
     /**
      * Show the form for editing the specified resource.
      *
      * @param  \App\Models\Museum  $museum
      * @return \Illuminate\Http\Response
      */
-    public function edit(Museum $museum)
+    public function edit(Museum $museum, Request $request)
     {
-        return view('edit_forms.museum_edit', ['museum' => $museum]);
+        $prefectures = Prefecture::all();        
+        return view('edit_forms.museum_edit', compact('museum', 'prefectures'));
     }
 
     /**
@@ -160,21 +206,26 @@ class MuseumController extends Controller
      * @param  \App\Models\Museum  $museum
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Museum $museum)
+    public function update(CreateMuseum $request, Museum $museum)
     {
-        $request->validate([
-            'name' => 'required',
-            'postalcode' => 'required|integer',
-            'prefecture_id' => 'required',
-            'address' => 'required',
-            'tel' => 'required|integer',
-            'image' => 'nullable|image',
-        ]);
+        // 画像が添付されているかどうかを確認
+        if ($request->hasFile('image')) {
+            // 画像を保存
+            $image = $request->file('image');
+            $path = $image->store('img','public');
+            $user_id = Auth::id();
+            // データベースに画像の情報を保存
+            Image::create([
+                'image_path' => $path, // 画像パスを設定する
+                'art_museum_id' => $museum->id,
+                'user_id' => $user_id
+            ]);
+        }
+    
+        $museum->update($request->except('image'));
 
-        $museum->update($request->all());
-
-        return redirect()->route('museums.edit')
-            ->with('success', 'Museum updated successfully');
+    
+        return redirect()->route('museums.show', $museum->id);
     }
 
     /**
@@ -185,9 +236,9 @@ class MuseumController extends Controller
      */
     public function destroy(Museum $museum)
     {
-        $museum->delete();
-
-        return redirect()->route('museums.index')
-            ->with('success', 'Museum deleted successfully');
+        $museum->del_flg = 1; // 削除フラグを立てる
+        $museum->save();
+    
+        return redirect()->route('museums.index');        
     }
 }

@@ -2,11 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateReview;
 use App\Review;
 use App\Museum;
 use App\Prefecture;
+use App\User;
+use App\Like;
+
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+use Illuminate\Support\Facades\DB;
+
 
 class ReviewController extends Controller
 {
@@ -18,20 +26,14 @@ class ReviewController extends Controller
     public function index(Request $request)
     {
         // 都道府県の取得
-        $prefecture = $request->input('prefecture');
+        $prefectures = Prefecture::all();
+        $prefectures = $request->input('prefectures');
 
         // 都道府県の名前を含む美術館のデータを取得
-        $museums = Museum::select('id', 'prefectures_id', 'name')->get();
+        $museum = Museum::select('id', 'prefecture_id', 'name')->get();
 
         // レビューの検索クエリを生成
-        $query = Review::query();
-
-        // 都道府県検索
-        if ($prefecture) {
-            $query->whereHas('museum', function ($q) use ($prefecture) {
-                $q->where('prefectures_id', $prefecture);
-            });
-        }
+        $query = Review::where('del_flg', 0);
 
         // 検索結果を取得し、ページネーションを適用
         $reviews = $query->latest()->paginate(30);
@@ -42,7 +44,8 @@ class ReviewController extends Controller
         // 美術館一覧ビューを返す
         return view('reviews.review_list', [
             'reviews' => $reviews,
-            'museums' => $museums,
+            'museum' => $museum,
+            'prefectures' => $prefectures,
             'pageCount' => $pageCount
         ]);
     }
@@ -54,7 +57,21 @@ class ReviewController extends Controller
      */
     public function create()
     {
-        return view('review_forms.review_reg');
+        // ログインしているかどうかを確認
+        if (Auth::check()) {
+
+        // 美術館名の取得
+        $museums = Museum::all();
+
+            // ビューにデータを渡して入力画面を表示する
+            return view('review_forms.review_reg', [
+                'museums' => $museums,
+            ]);
+        } else {
+            // ログインしていない場合はログインページにリダイレクト
+            return redirect()->route('login');
+        }
+
     }
 
     /**
@@ -63,9 +80,65 @@ class ReviewController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+
+    // 確認画面
+    public function store(CreateReview $request)
     {
-        //
+        $data = $request->validated();
+
+        $selectedMuseumId = $request->input('name');
+        
+        $museum = DB::table('art_museums')->where('id', $selectedMuseumId, 'id')->first();
+        if ($museum) {
+            $museumName = $museum->name;
+        } else {
+            // エラーハンドリングまたはデフォルト値の設定
+            $museumName = 'Unknown';
+        }
+        $data['name'] = $museumName;
+        
+        $data['art_museum_id'] = $selectedMuseumId;
+        
+        // セッションにデータを保存
+        session()->put('review_data', $data);
+        // 取得したデータをビューに渡して表示
+        return view('review_forms.review_conf', compact('data'));
+
+    }
+        
+    // 完了画面
+    public function complete()
+    {
+        // ログインしているユーザーのIDを取得
+        $id = Auth::id();
+        
+        // セッションから確認画面で保存したデータを取得
+        $data = session('review_data', []);
+
+        // 'art_museum_id' を取得
+        $selectedMuseumId = $data['art_museum_id'];
+
+        // データベースから美術館の情報を取得
+        $museum = DB::table('art_museums')->where('id', $selectedMuseumId)->first();
+
+        // データが存在すれば、美術館名を取得し、存在しない場合はデフォルト値を設定
+        if ($museum) {
+            $museumName = $museum->name;
+        } else {
+            $museumName = 'Unknown';
+        }
+
+        // Reviewモデルのインスタンスを生成してデータベースに保存
+        $review = new Review();
+        $review->art_museum_id = $selectedMuseumId;
+        $review->title = $data['title'];
+        $review->body = $data['body'];
+        $review->criterion = $data['criterion'];
+        $review->user_id = $id;
+        $review->save();
+
+        // ビューを返す
+        return view('review_forms.review_comp');
     }
 
     /**
@@ -74,17 +147,22 @@ class ReviewController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Review $reviews)
     {
-        $reviews = Review::findOrFail($id);
-        // レビューに関連する美術館情報を取得
-        $museums = $reviews -> museums;
-    
-        return view('reviews.review_detail', [
-            'reviews' => $reviews, 
-            'museums' => $museums,
-        ]);
+        $museum = $reviews->museum;
 
+        // ユーザーがログインしている場合、いいねの状態を取得
+        $isLiked = auth()->check() ? Like::where('user_id', auth()->id())
+                                        ->where('art_museum_id', $museum->id)
+                                        ->where('review_id', $reviews->id)
+                                        ->exists() : false;
+
+        
+        return view('reviews.review_detail', compact(
+            'reviews', 
+            'museum',
+            'isLiked'
+        ));
     }
 
     /**
@@ -93,9 +171,11 @@ class ReviewController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
-    {
-        //
+    public function edit(Review $reviews)
+    { 
+        return view('edit_forms.review_edit', compact(
+            'reviews'
+        ));
     }
 
     /**
@@ -105,19 +185,29 @@ class ReviewController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(CreateReview $request, Review $reviews)
     {
-        //
-    }
-
+        $data = $request->validated();
+    
+        $reviews->update([
+            'title' => $data['title'],
+            'body' => $data['body'],
+            'criterion' => $data['criterion'],
+        ]);
+    
+        return redirect()->route('reviews.show', $reviews->id);
+    }    
     /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Review $reviews)
     {
-        //
+        $reviews->del_flg = 1; // 削除フラグを立てる
+        $reviews->save();
+    
+        return redirect()->route('reviews.index');        
     }
 }

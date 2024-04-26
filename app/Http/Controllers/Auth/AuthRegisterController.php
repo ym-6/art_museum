@@ -17,7 +17,7 @@ class RegisterController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'user_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);
@@ -26,7 +26,7 @@ class RegisterController extends Controller
         $request->session()->flash('register_data', $request->all());
 
         // 確認画面にリダイレクト
-        return redirect()->route('auth.register_conf');
+        return redirect()->route('Auth.register_conf');
     }
 
     public function showConfirmation()
@@ -35,7 +35,7 @@ class RegisterController extends Controller
         $register_data = session('register_data');
 
         // セッションから取得したデータを確認画面に表示
-        return view('auth.register_conf', compact('register_data'));
+        return view('Auth.register_conf', compact('register_data'));
     }
 
     public function completeRegistration()
@@ -45,12 +45,12 @@ class RegisterController extends Controller
 
         // ユーザーを作成
         $user = User::create([
-            'name' => $register_data['name'],
+            'user_name' => $register_data['user_name'],
             'email' => $register_data['email'],
             'password' => Hash::make($register_data['password']),
         ]);
 
         // 登録完了画面にリダイレクト
-        return view('auth.registr_comp');
+        return view('Auth.registr_comp');
     }
 }

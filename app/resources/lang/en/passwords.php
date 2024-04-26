@@ -16,12 +16,7 @@ return [
     'reset' => 'Your password has been reset!',
     'sent' => 'We have e-mailed your password reset link!',
     'throttled' => 'Please wait before retrying.',
-<<<<<<< HEAD
     // 'token' => 'This password reset token is invalid.',
     'user' => "We can't find a user with that e-mail address.",
-=======
-    'token' => 'This password reset token is invalid.',
-    'user_name' => "We can't find a user with that e-mail address.",
->>>>>>> b3ebfeef344f3f48069633c72ed082d5a94575c3
 
 ];

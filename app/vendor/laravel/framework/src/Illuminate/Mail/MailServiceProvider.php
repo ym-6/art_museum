@@ -68,7 +68,7 @@ class MailServiceProvider extends ServiceProvider implements DeferrableProvider
         $address = Arr::get($config, $type);
 
         if (is_array($address) && isset($address['address'])) {
-            $mailer->{'always'.Str::studly($type)}($address['address'], $address['user_name']);
+            $mailer->{'always'.Str::studly($type)}($address['address'], $address['name']);
         }
     }
 
